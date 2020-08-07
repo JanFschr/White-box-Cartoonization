@@ -29,6 +29,13 @@ def arg_parser():
     parser.add_argument("--adv_train_lr", default = 2e-4, type = float)
     parser.add_argument("--gpu_fraction", default = 0.5, type = float)
     parser.add_argument("--save_dir", default = 'train_cartoon', type = str)
+    parser.add_argument("--pretrain_dir", default = 'pretrain/saved_models', type = str)
+    parser.add_argument("--vgg_model", default = 'vgg19_no_fc.npy', type = str)
+    parser.add_argument("--dataset_dir_photo_face", default = 'dataset/photo_face', type = str)
+    parser.add_argument("--dataset_dir_photo_scenery", default = 'dataset/photo_scenery', type = str)
+    parser.add_argument("--dataset_dir_cartoon_scenery", default = 'dataset/cartoon_face', type = str)
+    parser.add_argument("--dataset_dir_cartoon_face", default = 'dataset/cartoon_scenery', type = str)
+    
     parser.add_argument("--use_enhance", default = False)
 
     args = parser.parse_args()
@@ -62,7 +69,7 @@ def train(args):
                                              scale=1, patch=True, name='disc_blur')
 
 
-    vgg_model = loss.Vgg19('vgg19_no_fc.npy')
+    vgg_model = loss.Vgg19(args.vgg_file)
     vgg_photo = vgg_model.build_conv4_4(input_photo)
     vgg_output = vgg_model.build_conv4_4(output)
     vgg_superpixel = vgg_model.build_conv4_4(input_superpixel)
@@ -118,16 +125,16 @@ def train(args):
     with tf.device('/device:GPU:0'):
 
         sess.run(tf.global_variables_initializer())
-        saver.restore(sess, tf.train.latest_checkpoint('pretrain/saved_models'))
+        saver.restore(sess, tf.train.latest_checkpoint(args.pretrain_dir))
 
-        face_photo_dir = 'dataset/photo_face'
+        face_photo_dir = args.dataset_dir_photo_face
         face_photo_list = utils.load_image_list(face_photo_dir)
-        scenery_photo_dir = 'dataset/photo_scenery'
+        scenery_photo_dir = args.dataset_dir_photo_scenery
         scenery_photo_list = utils.load_image_list(scenery_photo_dir)
 
-        face_cartoon_dir = 'dataset/cartoon_face'
+        face_cartoon_dir = args.dataset_dir_cartoon_face
         face_cartoon_list = utils.load_image_list(face_cartoon_dir)
-        scenery_cartoon_dir = 'dataset/cartoon_scenery'
+        scenery_cartoon_dir = args.dataset_dir_cartoon_scenery
         scenery_cartoon_list = utils.load_image_list(scenery_cartoon_dir)
 
         for total_iter in tqdm(range(args.total_iter)):
