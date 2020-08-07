@@ -4,8 +4,25 @@ import numpy as np
 import tensorflow as tf 
 import network
 import guided_filter
+import argparse
+
 from tqdm import tqdm
 
+
+def arg_parser():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--model_path", default = 'saved_models', type = str)
+    parser.add_argument("--load_folder", default = 'vgg19_no_fc.npy', type = str)
+    parser.add_argument("--save_folder", default = 'vgg19_no_fc.npy', type = str)
+    #parser.add_argument("--fast_shrink", default = True, type = boolean)
+
+    
+
+
+    args = parser.parse_args()
+    
+    return args
 
 
 def resize_crop(image):
@@ -57,9 +74,10 @@ def cartoonize(load_folder, save_folder, model_path):
     
 
 if __name__ == '__main__':
-    model_path = 'saved_models'
-    load_folder = 'test_images'
-    save_folder = 'cartoonized_images'
+    args = arg_parser()
+    model_path = args.model_path
+    load_folder = args.loader_folder
+    save_folder = args.save_folder
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
     cartoonize(load_folder, save_folder, model_path)
