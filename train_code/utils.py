@@ -142,8 +142,7 @@ def next_batch(filename_list, batch_size):
             
     return np.asarray(batch_data)
 
-
-
+#check if still output erros ?! 
 def write_batch_image(image, save_dir, name, n):
     
     if not os.path.exists(save_dir):
