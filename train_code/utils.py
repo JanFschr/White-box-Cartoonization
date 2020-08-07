@@ -8,8 +8,8 @@ by Xinrui Wang and Jinze yu
 from scipy.ndimage import filters
 from skimage import segmentation, color
 from joblib import Parallel, delayed
-from selective_search.util import switch_color_space
-from selective_search.structure import HierarchicalGrouping
+#from selective_search.util import switch_color_space
+#from selective_search.structure import HierarchicalGrouping
 
 import os
 import cv2
