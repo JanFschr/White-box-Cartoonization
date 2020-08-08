@@ -8,6 +8,9 @@ import argparse
 
 from tqdm import tqdm
 
+import warnings
+warnings.filterwarnings('ignore',category=FutureWarning)
+
 
 def arg_parser():
     parser = argparse.ArgumentParser()
