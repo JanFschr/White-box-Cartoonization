@@ -148,9 +148,7 @@ def train(args):
         scenery_cartoon_dir = args.dataset_dir_cartoon_scenery
         scenery_cartoon_list = utils.load_image_list(scenery_cartoon_dir)
 
-        for total_iter in tqdm(range(args.total_iter), initial=start_iter):
-            
-           total_iter += start_iter
+        for total_iter in tqdm(range(start_iter, args.total_iter), initial=start_iter):
 
             if np.mod(total_iter, 5) == 0: 
                 photo_batch = utils.next_batch(face_photo_list, args.batch_size)
