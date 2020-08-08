@@ -69,7 +69,7 @@ def train(args):
                                              scale=1, patch=True, name='disc_blur')
 
 
-    vgg_model = loss.Vgg19(args.vgg_file)
+    vgg_model = loss.Vgg19(args.vgg_model)
     vgg_photo = vgg_model.build_conv4_4(input_photo)
     vgg_output = vgg_model.build_conv4_4(output)
     vgg_superpixel = vgg_model.build_conv4_4(input_superpixel)
