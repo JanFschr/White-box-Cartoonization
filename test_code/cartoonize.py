@@ -12,7 +12,7 @@ from tqdm import tqdm
 def arg_parser():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_path", default = 'saved_models', type = str)
+    parser.add_argument("--saved_model_path", default = 'saved_models', type = str)
     parser.add_argument("--load_folder", default = 'vgg19_no_fc.npy', type = str)
     parser.add_argument("--save_folder", default = 'vgg19_no_fc.npy', type = str)
     #parser.add_argument("--fast_shrink", default = True, type = boolean)
