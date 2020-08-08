@@ -79,7 +79,7 @@ def cartoonize(load_folder, save_folder, model_path):
 if __name__ == '__main__':
     args = arg_parser()
     model_path = args.saved_model_path
-    load_folder = args.loader_folder
+    load_folder = args.load_folder
     save_folder = args.save_folder
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
