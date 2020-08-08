@@ -35,7 +35,7 @@ def arg_parser():
     parser.add_argument("--dataset_dir_photo_scenery", default = 'dataset/photo_scenery', type = str)
     parser.add_argument("--dataset_dir_cartoon_scenery", default = 'dataset/cartoon_face', type = str)
     parser.add_argument("--dataset_dir_cartoon_face", default = 'dataset/cartoon_scenery', type = str)
-    parser.add_argument("--continue", default = False, type = boolean)
+    parser.add_argument("--continue_training", default = False, type = boolean)
 
     
     parser.add_argument("--use_enhance", default = False)
@@ -127,7 +127,7 @@ def train(args):
     with tf.device('/device:GPU:0'):
 
         sess.run(tf.global_variables_initializer())
-        if args.continue:
+        if args.continue_training:
             saver.restore(sess, tf.train.latest_checkpoint(args.save_dir+'saved_models'))
             #TODO do in a better way!
             start_iter = int(str(tf.train.latest_checkpoint(args.save_dir+'saved_models')).split("-")[-1])
