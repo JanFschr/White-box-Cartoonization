@@ -19,7 +19,8 @@ from tqdm import tqdm
 from guided_filter import guided_filter
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-
+import warnings
+warnings.filterwarnings('ignore',category=FutureWarning)
 
 def arg_parser():
     parser = argparse.ArgumentParser()
@@ -38,6 +39,7 @@ def arg_parser():
     parser.add_argument('--continue_training', default=False, type=lambda x: (str(x).lower() in ['true','1', 'yes']))
     
     parser.add_argument("--use_enhance", default = False)
+    
 
     args = parser.parse_args()
     
@@ -146,7 +148,7 @@ def train(args):
         scenery_cartoon_dir = args.dataset_dir_cartoon_scenery
         scenery_cartoon_list = utils.load_image_list(scenery_cartoon_dir)
 
-        for total_iter in tqdm(range(start_iter, args.total_iter)):
+        for total_iter in tqdm(range(args.total_iter), initial=start_iter):
 
             if np.mod(total_iter, 5) == 0: 
                 photo_batch = utils.next_batch(face_photo_list, args.batch_size)
