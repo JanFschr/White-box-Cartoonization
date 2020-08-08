@@ -83,7 +83,7 @@ if __name__ == '__main__':
     save_folder = args.save_folder
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
-    cartoonize(load_folder, save_folder, saved_model_path)
+    cartoonize(load_folder, save_folder, model_path)
     
 
     
