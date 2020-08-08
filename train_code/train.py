@@ -35,8 +35,7 @@ def arg_parser():
     parser.add_argument("--dataset_dir_photo_scenery", default = 'dataset/photo_scenery', type = str)
     parser.add_argument("--dataset_dir_cartoon_scenery", default = 'dataset/cartoon_face', type = str)
     parser.add_argument("--dataset_dir_cartoon_face", default = 'dataset/cartoon_scenery', type = str)
-    parser.add_argument('--continue_training', default=False, type=lambda x: (str(x).lower() in ['true','1', 'yes'])
-
+    parser.add_argument('--continue_training', default=False, type=lambda x: (str(x).lower() in ['true','1', 'yes']))
     
     parser.add_argument("--use_enhance", default = False)
 
