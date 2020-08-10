@@ -170,7 +170,7 @@ def train(args):
             '''
             if args.use_enhance:
                 superpixel_batch = utils.selective_adacolor(inter_out, power=1.0)
-                superpixel_batch = utils.selective_adacolor(inter_out, power=1.2)
+                #superpixel_batch = utils.selective_adacolor(inter_out, power=1.2)
 
             else:
                 superpixel_batch = utils.simple_superpixel(inter_out, seg_num=200)
