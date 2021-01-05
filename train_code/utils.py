@@ -8,8 +8,8 @@ by Xinrui Wang and Jinze yu
 from scipy.ndimage import filters
 from skimage import segmentation, color
 from joblib import Parallel, delayed
-#from selective_search.util import switch_color_space
-#from selective_search.structure import HierarchicalGrouping
+from selective_search.util import switch_color_space
+from selective_search.structure import HierarchicalGrouping
 
 import os
 import cv2
@@ -142,7 +142,8 @@ def next_batch(filename_list, batch_size):
             
     return np.asarray(batch_data)
 
-#check if still output erros ?! 
+
+
 def write_batch_image(image, save_dir, name, n):
     
     if not os.path.exists(save_dir):
@@ -166,4 +167,3 @@ def write_batch_image(image, save_dir, name, n):
 
 if __name__ == '__main__':
     pass
-    

@@ -7,8 +7,7 @@ by Xinrui Wang and Jinze yu
 
 
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
-
+import tf_slim as slim
 import utils
 import os
 import numpy as np
@@ -18,7 +17,6 @@ from tqdm import tqdm
 
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-
 
 def arg_parser():
     parser = argparse.ArgumentParser()
@@ -41,20 +39,20 @@ def arg_parser():
 def train(args):
     
 
-    input_photo = tf.placeholder(tf.float32, [args.batch_size, 
+    input_photo = tf.compat.v1.placeholder(tf.float32, [args.batch_size, 
                                 args.patch_size, args.patch_size, 3])
     
     output = network.unet_generator(input_photo)
     
-    recon_loss = tf.reduce_mean(tf.losses.absolute_difference(input_photo, output))
+    recon_loss = tf.reduce_mean(input_tensor=tf.compat.v1.losses.absolute_difference(input_photo, output))
 
-    all_vars = tf.trainable_variables()
+    all_vars = tf.compat.v1.trainable_variables()
     gene_vars = [var for var in all_vars if 'gene' in var.name]
       
-    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
         
-        optim = tf.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
+        optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
                                         .minimize(recon_loss, var_list=gene_vars)
         
         
@@ -63,13 +61,13 @@ def train(args):
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
     '''
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_fraction)
-    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
-    saver = tf.train.Saver(var_list=gene_vars, max_to_keep=20)
+    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=args.gpu_fraction)
+    sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+    saver = tf.compat.v1.train.Saver(var_list=gene_vars, max_to_keep=20)
    
     with tf.device('/device:GPU:0'):
 
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
         face_photo_dir = args.dataset_dir_photo_face
         face_photo_list = utils.load_image_list(face_photo_dir)
         scenery_photo_dir = args.dataset_dir_photo_scenery
@@ -87,8 +85,10 @@ def train(args):
 
             if np.mod(total_iter+1, 50) == 0:
 
+                
                 print('pretrain, iter: {}, recon_loss: {}'.format(total_iter, r_loss))
                 if np.mod(total_iter+1, 500 ) == 0:
+                    
                     saver.save(sess, args.save_dir+'save_models/model', 
                                write_meta_graph=False, global_step=total_iter)
                      
@@ -107,6 +107,7 @@ def train(args):
                                             str(total_iter)+'_scenery_result.jpg', 4)
                     utils.write_batch_image(photo_scenery, args.save_dir+'/images', 
                                             str(total_iter)+'_scenery_photo.jpg', 4)
+        
 
                     
 

@@ -6,22 +6,22 @@ by Xinrui Wang and Jinze yu
 
 
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
-
+import tf_slim as slim
 import utils
 import os
 import numpy as np
 import argparse
 import network 
 import loss
-
+import random
 from tqdm import tqdm
 from guided_filter import guided_filter
-
+random.seed(0)
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning)
 
+tf.compat.v1.disable_eager_execution()
 def arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--patch_size", default = 256, type = int)
@@ -50,11 +50,11 @@ def arg_parser():
 def train(args):
     
 
-    input_photo = tf.placeholder(tf.float32, [args.batch_size, 
+    input_photo = tf.compat.v1.placeholder(tf.float32, [args.batch_size, 
                                 args.patch_size, args.patch_size, 3])
-    input_superpixel = tf.placeholder(tf.float32, [args.batch_size, 
+    input_superpixel = tf.compat.v1.placeholder(tf.float32, [args.batch_size, 
                                 args.patch_size, args.patch_size, 3])
-    input_cartoon = tf.placeholder(tf.float32, [args.batch_size, 
+    input_cartoon = tf.compat.v1.placeholder(tf.float32, [args.batch_size, 
                                 args.patch_size, args.patch_size, 3])
     
     output = network.unet_generator(input_photo)
@@ -78,8 +78,8 @@ def train(args):
     vgg_superpixel = vgg_model.build_conv4_4(input_superpixel)
     h, w, c = vgg_photo.get_shape().as_list()[1:]
     
-    photo_loss = tf.reduce_mean(tf.losses.absolute_difference(vgg_photo, vgg_output))/(h*w*c)
-    superpixel_loss = tf.reduce_mean(tf.losses.absolute_difference\
+    photo_loss = tf.reduce_mean(input_tensor=tf.compat.v1.losses.absolute_difference(vgg_photo, vgg_output))/(h*w*c)
+    superpixel_loss = tf.reduce_mean(input_tensor=tf.compat.v1.losses.absolute_difference\
                                      (vgg_superpixel, vgg_output))/(h*w*c)
     recon_loss = photo_loss + superpixel_loss
     tv_loss = loss.total_variation_loss(output)
@@ -87,29 +87,29 @@ def train(args):
     g_loss_total = 1e4*tv_loss + 1e-1*g_loss_blur + g_loss_gray + 2e2*recon_loss
     d_loss_total = d_loss_blur + d_loss_gray
 
-    all_vars = tf.trainable_variables()
+    all_vars = tf.compat.v1.trainable_variables()
     gene_vars = [var for var in all_vars if 'gene' in var.name]
     disc_vars = [var for var in all_vars if 'disc' in var.name] 
     
     
-    tf.summary.scalar('tv_loss', tv_loss)
-    tf.summary.scalar('photo_loss', photo_loss)
-    tf.summary.scalar('superpixel_loss', superpixel_loss)
-    tf.summary.scalar('recon_loss', recon_loss)
-    tf.summary.scalar('d_loss_gray', d_loss_gray)
-    tf.summary.scalar('g_loss_gray', g_loss_gray)
-    tf.summary.scalar('d_loss_blur', d_loss_blur)
-    tf.summary.scalar('g_loss_blur', g_loss_blur)
-    tf.summary.scalar('d_loss_total', d_loss_total)
-    tf.summary.scalar('g_loss_total', g_loss_total)
+    tf.compat.v1.summary.scalar('tv_loss', tv_loss)
+    tf.compat.v1.summary.scalar('photo_loss', photo_loss)
+    tf.compat.v1.summary.scalar('superpixel_loss', superpixel_loss)
+    tf.compat.v1.summary.scalar('recon_loss', recon_loss)
+    tf.compat.v1.summary.scalar('d_loss_gray', d_loss_gray)
+    tf.compat.v1.summary.scalar('g_loss_gray', g_loss_gray)
+    tf.compat.v1.summary.scalar('d_loss_blur', d_loss_blur)
+    tf.compat.v1.summary.scalar('g_loss_blur', g_loss_blur)
+    tf.compat.v1.summary.scalar('d_loss_total', d_loss_total)
+    tf.compat.v1.summary.scalar('g_loss_total', g_loss_total)
       
-    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
         
-        g_optim = tf.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
+        g_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
                                         .minimize(g_loss_total, var_list=gene_vars)
         
-        d_optim = tf.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
+        d_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
                                         .minimize(d_loss_total, var_list=disc_vars)
            
     '''
@@ -117,17 +117,17 @@ def train(args):
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
     '''
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_fraction)
-    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=args.gpu_fraction)
+    sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
     
     
-    train_writer = tf.summary.FileWriter(args.save_dir+'/train_log')
-    summary_op = tf.summary.merge_all()
-    saver = tf.train.Saver(var_list=gene_vars, max_to_keep=20)
+    train_writer = tf.compat.v1.summary.FileWriter(args.save_dir+'/train_log')
+    summary_op = tf.compat.v1.summary.merge_all()
+    saver = tf.compat.v1.train.Saver(var_list=gene_vars, max_to_keep=20)
    
     with tf.device('/device:GPU:0'):
 
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
         if args.continue_training:
             saver.restore(sess, tf.train.latest_checkpoint(args.save_dir+'saved_models'))
             #TODO do in a better way!
@@ -193,10 +193,12 @@ def train(args):
 
                 print('Iter: {}, d_loss: {}, g_loss: {}, recon_loss: {}'.\
                         format(total_iter, d_loss, g_loss, r_loss))
-                if np.mod(total_iter+1, 500 ) == 0:
+                if np.mod(total_iter+1, 250 ) == 0:
                     saver.save(sess, args.save_dir+'/saved_models/model', 
                                write_meta_graph=False, global_step=total_iter)
-                     
+
+                if np.mod(total_iter+1, 500 ) == 0:
+                    
                     photo_face = utils.next_batch(face_photo_list, args.batch_size)
                     cartoon_face = utils.next_batch(face_cartoon_list, args.batch_size)
                     photo_scenery = utils.next_batch(scenery_photo_list, args.batch_size)
@@ -214,11 +216,11 @@ def train(args):
                                             str(total_iter)+'_face_result.jpg', 4)
                     utils.write_batch_image(photo_face, args.save_dir+'/images', 
                                             str(total_iter)+'_face_photo.jpg', 4)
-
                     utils.write_batch_image(result_scenery, args.save_dir+'/images', 
                                             str(total_iter)+'_scenery_result.jpg', 4)
                     utils.write_batch_image(photo_scenery, args.save_dir+'/images', 
                                             str(total_iter)+'_scenery_photo.jpg', 4)
+
 
             
 if __name__ == '__main__':
