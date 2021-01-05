@@ -135,7 +135,7 @@ def train(args):
             #TODO do in a better way!
             start_iter = int(str(tf.train.latest_checkpoint(args.save_dir+'saved_models')).split("-")[-1])
             start_iter+=1
-            saver.restore(sess, model_checkpoint_file_base)
+            
             g_optim = tf.get_collection("g_optim")[0]
             d_optim = tf.get_collection("d_optim")[0]
             
