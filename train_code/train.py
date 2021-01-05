@@ -129,12 +129,19 @@ def train(args):
     with tf.device('/device:GPU:0'):
 
         sess.run(tf.compat.v1.global_variables_initializer())
+        
         if args.continue_training:
             saver.restore(sess, tf.train.latest_checkpoint(args.save_dir+'saved_models'))
             #TODO do in a better way!
             start_iter = int(str(tf.train.latest_checkpoint(args.save_dir+'saved_models')).split("-")[-1])
             start_iter+=1
+            saver.restore(sess, model_checkpoint_file_base)
+            g_optim = tf.get_collection("g_optim")[0]
+            d_optim = tf.get_collection("d_optim")[0]
+            
         else:
+            tf.compat.v1.add_to_collection("g_optim", g_optim)
+            tf.compat.v1.add_to_collection("d_optim", d_optim)  
             saver.restore(sess, tf.train.latest_checkpoint(args.pretrain_dir))
             start_iter = 0
             
@@ -196,7 +203,7 @@ def train(args):
                         format(total_iter, d_loss, g_loss, r_loss))
                 if np.mod(total_iter+1, 250 ) == 0:
                     saver.save(sess, args.save_dir+'/saved_models/model', 
-                               write_meta_graph=False, global_step=total_iter)
+                               write_meta_graph=True, global_step=total_iter) # TODO check if write graph needed 
 
                 if np.mod(total_iter+1, 500 ) == 0:
                     
