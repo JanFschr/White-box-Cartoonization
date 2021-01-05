@@ -87,9 +87,11 @@ def train(args):
     g_loss_total = 1e4*tv_loss + 1e-1*g_loss_blur + g_loss_gray + 2e2*recon_loss
     d_loss_total = d_loss_blur + d_loss_gray
 
+    init = tf.initialize_all_variables()
     all_vars = tf.compat.v1.trainable_variables()
     gene_vars = [var for var in all_vars if 'gene' in var.name]
     disc_vars = [var for var in all_vars if 'disc' in var.name] 
+    
     
     
     tf.compat.v1.summary.scalar('tv_loss', tv_loss)
@@ -105,14 +107,13 @@ def train(args):
       
     update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
     
+    
     with tf.control_dependencies(update_ops):
-        
-        g_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
-                                        .minimize(g_loss_total, var_list=gene_vars)
-        
-        d_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
-                                        .minimize(d_loss_total, var_list=disc_vars)
-           
+            g_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
+                                            .minimize(g_loss_total, var_list=gene_vars)
+            
+            d_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
+                                            .minimize(d_loss_total, var_list=disc_vars)
     '''
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -124,11 +125,12 @@ def train(args):
     
     train_writer = tf.compat.v1.summary.FileWriter(args.save_dir+'/train_log')
     summary_op = tf.compat.v1.summary.merge_all()
-    saver = tf.compat.v1.train.Saver(var_list=gene_vars, max_to_keep=20)
-   
+    
+    #saver = tf.compat.v1.train.Saver(var_list=gene_vars, max_to_keep=20)
+    saver = tf.compat.v1.train.Saver()
     with tf.device('/device:GPU:0'):
 
-        sess.run(tf.compat.v1.global_variables_initializer())
+        
         
         if args.continue_training:
             saver.restore(sess, tf.train.latest_checkpoint(args.save_dir+'saved_models'))
@@ -136,10 +138,11 @@ def train(args):
             start_iter = int(str(tf.train.latest_checkpoint(args.save_dir+'saved_models')).split("-")[-1])
             start_iter+=1
             
-            g_optim = tf.get_collection("g_optim")[0]
-            d_optim = tf.get_collection("d_optim")[0]
+            g_optim = tf.compat.v1.get_collection("g_optim")[0]
+            d_optim = tf.compat.v1.get_collection("d_optim")[0]
             
         else:
+            sess.run(tf.compat.v1.global_variables_initializer())
             tf.compat.v1.add_to_collection("g_optim", g_optim)
             tf.compat.v1.add_to_collection("d_optim", d_optim)  
             saver.restore(sess, tf.train.latest_checkpoint(args.pretrain_dir))
