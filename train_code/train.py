@@ -142,10 +142,12 @@ def train(args):
             d_optim = tf.compat.v1.get_collection("d_optim")[0]
             
         else:
+            pretrain_saver = tf.compat.v1.train.Saver(var_list=gene_vars, max_to_keep=20)
             sess.run(tf.compat.v1.global_variables_initializer())
+            pretrain_saver.restore(sess, tf.train.latest_checkpoint(args.pretrain_dir))
             tf.compat.v1.add_to_collection("g_optim", g_optim)
             tf.compat.v1.add_to_collection("d_optim", d_optim)  
-            saver.restore(sess, tf.train.latest_checkpoint(args.pretrain_dir))
+            
             start_iter = 0
             
 
