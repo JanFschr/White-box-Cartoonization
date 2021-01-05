@@ -104,6 +104,7 @@ def train(args):
     tf.compat.v1.summary.scalar('g_loss_total', g_loss_total)
       
     update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
+    
     with tf.control_dependencies(update_ops):
         
         g_optim = tf.compat.v1.train.AdamOptimizer(args.adv_train_lr, beta1=0.5, beta2=0.99)\
