@@ -87,7 +87,7 @@ def train(args):
     g_loss_total = 1e4*tv_loss + 1e-1*g_loss_blur + g_loss_gray + 2e2*recon_loss
     d_loss_total = d_loss_blur + d_loss_gray
 
-    init = tf.initialize_all_variables()
+    init = tf.compat.v1.initialize_all_variables()
     all_vars = tf.compat.v1.trainable_variables()
     gene_vars = [var for var in all_vars if 'gene' in var.name]
     disc_vars = [var for var in all_vars if 'disc' in var.name] 
